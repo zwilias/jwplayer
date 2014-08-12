@@ -250,31 +250,32 @@
      * If the browser has flash capabilities, return the flash version
      */
     utils.flashVersion = function() {
-        if (utils.isAndroid()) {
-            return 0;
-        }
+        if (!utils.isAndroid()) {
+            var plugins = navigator.plugins,
+                flash,
+                version;
 
-        var plugins = navigator.plugins,
-            flash;
-
-        try {
-            if (plugins !== 'undefined') {
+            // we're only checking major version, but we build to 10.1
+            if (typeof plugins !== 'undefined') {
                 flash = plugins['Shockwave Flash'];
                 if (flash) {
-                    return parseInt(flash.description.replace(/\D+(\d+)\..*/, '$1'), 10);
+                    // "Shockwave Flash 14.0 r0"
+                    version = flash.description;
                 }
             }
-        } catch (e) {
-            // The above evaluation (plugins != undefined) messes up IE7
-        }
 
-        if (typeof window.ActiveXObject !== 'undefined') {
-            try {
-                flash = new window.ActiveXObject('ShockwaveFlash.ShockwaveFlash');
-                if (flash) {
-                    return parseInt(flash.GetVariable('$version').split(' ')[1].split(',')[0], 10);
-                }
-            } catch (err) {}
+            if (typeof window.ActiveXObject !== 'undefined') {
+                try {
+                    flash = new window.ActiveXObject('ShockwaveFlash.ShockwaveFlash');
+                    if (flash) {
+                        // "WIN 14,0,0,145"
+                        version = flash.GetVariable('$version');
+                    }
+                } catch (err) {}
+            }
+        }
+        if (version) {
+            return parseFloat('0'+version.replace(/\D+(\d+)[\.,](\d+).*/, '$1.$2'));
         }
         return 0;
     };

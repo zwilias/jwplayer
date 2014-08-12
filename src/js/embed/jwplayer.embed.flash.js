@@ -6,7 +6,8 @@
 
     var _flash = jwplayer.embed.flash = function(_container, _player, _options, _loader, _api) {
         var _eventDispatcher = new jwplayer.events.eventdispatcher(),
-            _flashVersion = utils.flashVersion();
+            TARGET_FLASH_PLAYER = 10.1,
+            _flashSupport = utils.flashVersion() >= TARGET_FLASH_PLAYER;
         utils.extend(this, _eventDispatcher);
 
 
@@ -57,9 +58,9 @@
             _options.id = _api.id;
 
             // If Flash is installed, but the version is too low, display an error.
-            if (_flashVersion < 10) {
+            if (!_flashSupport) {
                 _eventDispatcher.sendEvent(events.ERROR, {
-                    message: 'Flash version must be 10.0 or greater'
+                    message: 'Flash version must be ' + TARGET_FLASH_PLAYER + ' or greater'
                 });
                 return false;
             }
@@ -196,7 +197,7 @@
          * Detects whether Flash supports this configuration
          */
         this.supportsConfig = function() {
-            if (_flashVersion) {
+            if (_flashSupport) {
                 if (_options) {
                     if (utils.typeOf(_options.playlist) === 'string') {
                         return true;
@@ -215,9 +216,7 @@
                                 }
                             }
                         }
-                    } catch (e) {
-                        return false;
-                    }
+                    } catch (e) {}
                 } else {
                     return true;
                 }
