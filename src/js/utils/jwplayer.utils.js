@@ -3,6 +3,7 @@
 
     var utils = jwplayer.utils = {};
     var _ = jwplayer._;
+    var noop = function() {};
 
     /**
      * Returns true if the value of the object is null, undefined or the empty
@@ -10,7 +11,7 @@
      *
      * @param a The variable to inspect
      */
-    utils.exists = function(item) {
+    var exists = function(item) {
         switch (typeof(item)) {
             case 'string':
                 return (item.length > 0);
@@ -30,10 +31,10 @@
 
     /** Gets an absolute file path based on a relative filepath * */
     utils.getAbsolutePath = function(path, base) {
-        if (!utils.exists(base)) {
+        if (!exists(base)) {
             base = document.location.href;
         }
-        if (!utils.exists(path)) {
+        if (!exists(path)) {
             return;
         }
         if (isAbsolutePath(path)) {
@@ -51,7 +52,7 @@
         }
         var result = [];
         for (var i = 0; i < patharray.length; i++) {
-            if (!patharray[i] || !utils.exists(patharray[i]) || patharray[i] === '.') {
+            if (!patharray[i] || !exists(patharray[i]) || patharray[i] === '.') {
                 continue;
             } else if (patharray[i] === '..') {
                 result.pop();
@@ -63,7 +64,7 @@
     };
 
     function isAbsolutePath(path) {
-        if (!utils.exists(path)) {
+        if (!exists(path)) {
             return;
         }
         var protocol = path.indexOf('://');
@@ -72,7 +73,7 @@
     }
 
     /** Merges a list of objects **/
-    utils.extend = function() {
+    var extend = function() {
         var args = Array.prototype.slice.call(arguments, 0);
         if (args.length > 1) {
             var objectToExtend = args[0],
@@ -82,7 +83,7 @@
                     }
                 };
             for (var i = 1; i < args.length; i++) {
-                utils.foreach(args[i], extendEach);
+                foreach(args[i], extendEach);
             }
             return objectToExtend;
         }
@@ -91,7 +92,7 @@
 
     /** Logger */
     var console = window.console = window.console || {
-        log: function() {}
+        log: noop
     };
     utils.log = function() {
         var args = Array.prototype.slice.call(arguments, 0);
@@ -119,7 +120,7 @@
     utils.isIPad = _browserCheck(/iPad/i);
     utils.isSafari602 = _browserCheck(/Macintosh.*Mac OS X 10_8.*6\.0\.\d* Safari/i);
 
-    utils.isIETrident = function(version) {
+    var isIETrident = function(version) {
         if (version) {
             version = parseFloat(version).toFixed(1);
             return _userAgentMatch(new RegExp('trident/.+rv:\\s*' + version, 'i'));
@@ -128,7 +129,7 @@
     };
 
 
-    utils.isMSIE = function(version) {
+    var isMSIE = function(version) {
         if (version) {
             version = parseFloat(version).toFixed(1);
             return _userAgentMatch(new RegExp('msie\\s*' + version, 'i'));
@@ -139,12 +140,12 @@
         if (version) {
             version = parseFloat(version).toFixed(1);
             if (version >= 11) {
-                return utils.isIETrident(version);
+                return isIETrident(version);
             } else {
-                return utils.isMSIE(version);
+                return isMSIE(version);
             }
         }
-        return utils.isMSIE() || utils.isIETrident();
+        return isMSIE() || isIETrident();
     };
 
     utils.isSafari = function() {
@@ -153,7 +154,7 @@
     };
 
     /** Matches iOS devices **/
-    utils.isIOS = function(version) {
+    var isIOS = function(version) {
         if (version) {
             return _userAgentMatch(new RegExp('iP(hone|ad|od).+\\sOS\\s' + version, 'i'));
         }
@@ -162,17 +163,17 @@
 
     /** Matches Android devices **/
     utils.isAndroidNative = function(version) {
-        return utils.isAndroid(version, true);
+        return isAndroid(version, true);
     };
 
-    utils.isAndroid = function(version, excludeChrome) {
+    var isAndroid = function(version, excludeChrome) {
         //Android Browser appears to include a user-agent string for Chrome/18
         if (excludeChrome && _userAgentMatch(/chrome\/[123456789]/i) && !_userAgentMatch(/chrome\/18/)) {
             return false;
         }
         if (version) {
             // make sure whole number version check ends with point '.'
-            if (utils.isInt(version) && !/\./.test(version)) {
+            if (isInt(version) && !/\./.test(version)) {
                 version = '' + version + '.';
             }
             return _userAgentMatch(new RegExp('Android\\s*' + version, 'i'));
@@ -182,7 +183,7 @@
 
     /** Matches iOS and Android devices **/
     utils.isMobile = function() {
-        return utils.isIOS() || utils.isAndroid();
+        return isIOS() || isAndroid();
     };
 
     /** Save a setting **/
@@ -203,12 +204,12 @@
         return jwCookies;
     };
 
-    utils.isInt = function(value) {
+    var isInt = function(value) {
         return parseFloat(value) % 1 === 0;
     };
 
     /** Returns the true type of an object * */
-    utils.typeOf = function(value) {
+    var typeOf = function(value) {
         if (value === null) {
             return 'null';
         }
@@ -223,7 +224,7 @@
 
     /* Normalizes differences between Flash and HTML5 internal players' event responses. */
     utils.translateEventResponse = function(type, eventProperties) {
-        var translated = utils.extend({}, eventProperties);
+        var translated = extend({}, eventProperties);
         if (type === jwplayer.events.JWPLAYER_FULLSCREEN && !translated.fullscreen) {
             translated.fullscreen = (translated.message === 'true');
             delete translated.message;
@@ -231,15 +232,15 @@
             // Takes ViewEvent 'data' block and moves it up a level
             var data = translated.data;
             delete translated.data;
-            translated = utils.extend(translated, data);
+            translated = extend(translated, data);
 
         } else if (typeof translated.metadata === 'object') {
-            utils.deepReplaceKeyName(translated.metadata,
+            deepReplaceKeyName(translated.metadata,
                 ['__dot__', '__spc__', '__dsh__', '__default__'], ['.', ' ', '-', 'default']);
         }
 
         var rounders = ['position', 'duration', 'offset'];
-        utils.foreach(rounders, function(rounder, val) {
+        foreach(rounders, function(rounder, val) {
             if (translated[val]) {
                 translated[val] = Math.round(translated[val] * 1000) / 1000;
             }
@@ -252,7 +253,7 @@
      * If the browser has flash capabilities, return the flash version
      */
     utils.flashVersion = function() {
-        if (utils.isAndroid()) {
+        if (isAndroid()) {
             return 0;
         }
 
@@ -304,16 +305,16 @@
      *            The string to replace in the object's key names
      * @returns The modified object.
      */
-    utils.deepReplaceKeyName = function(obj, searchString, replaceString) {
-        switch (jwplayer.utils.typeOf(obj)) {
-            case 'array':
-                for (var i = 0; i < obj.length; i++) {
-                    obj[i] = jwplayer.utils.deepReplaceKeyName(obj[i],
-                        searchString, replaceString);
-                }
-                break;
-            case 'object':
-                utils.foreach(obj, function(key, val) {
+    var deepReplaceKeyName = function(obj, searchString, replaceString) {
+        var i, type = typeOf(obj);
+        if (type === 'array') {
+            for (i = 0; i < obj.length; i++) {
+                obj[i] = deepReplaceKeyName(obj[i], searchString, replaceString);
+            }
+        } else if (type === 'object') {
+            for (var key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    var val = obj[key];
                     var searches;
                     if (searchString instanceof Array && replaceString instanceof Array) {
                         if (searchString.length !== replaceString.length) {
@@ -325,15 +326,15 @@
                         searches = [searchString];
                     }
                     var newkey = key;
-                    for (var i = 0; i < searches.length; i++) {
+                    for (i = 0; i < searches.length; i++) {
                         newkey = newkey.replace(new RegExp(searchString[i], 'g'), replaceString[i]);
                     }
-                    obj[newkey] = jwplayer.utils.deepReplaceKeyName(val, searchString, replaceString);
+                    obj[newkey] = deepReplaceKeyName(val, searchString, replaceString);
                     if (key !== newkey) {
                         delete obj[key];
                     }
-                });
-                break;
+                }
+            }
         }
         return obj;
     };
@@ -342,7 +343,7 @@
     /**
      * Types of plugin paths
      */
-    var _pluginPathType = utils.pluginPathType = {
+    var pluginPathType = {
         ABSOLUTE: 0,
         RELATIVE: 1,
         CDN: 2
@@ -355,14 +356,14 @@
         path = path.split('?')[0];
         var protocol = path.indexOf('://');
         if (protocol > 0) {
-            return _pluginPathType.ABSOLUTE;
+            return pluginPathType.ABSOLUTE;
         }
         var folder = path.indexOf('/');
         var extension = utils.extension(path);
         if (protocol < 0 && folder < 0 && (!extension || !isNaN(extension))) {
-            return _pluginPathType.CDN;
+            return pluginPathType.CDN;
         }
-        return _pluginPathType.RELATIVE;
+        return pluginPathType.RELATIVE;
     };
 
 
@@ -422,10 +423,10 @@
      * Iterates over an object and executes a callback function for each property (if it exists)
      * This is a safe way to iterate over objects if another script has modified the object prototype
      */
-    utils.foreach = function(aData, fnEach) {
+    var foreach = function(aData, fnEach) {
         var key, val;
         for (key in aData) {
-            if (utils.typeOf(aData.hasOwnProperty) === 'function') {
+            if (_.isFunction(aData.hasOwnProperty)) {
                 if (aData.hasOwnProperty(key)) {
                     val = aData[key];
                     fnEach(key, val);
@@ -439,7 +440,7 @@
     };
 
     /** Determines if the current page is HTTPS **/
-    utils.isHTTPS = function() {
+    var isHTTPS = function() {
         return (window.location.href.indexOf('https') === 0);
     };
 
@@ -448,7 +449,7 @@
         var repo = 'http://p.jwpcdn.com/' + jwplayer.version.split(/\W/).splice(0, 2).join('/') + '/';
 
         try {
-            if (utils.isHTTPS()) {
+            if (isHTTPS()) {
                 repo = repo.replace('http://', 'https://ssl.');
             }
         } catch (e) {}
@@ -480,13 +481,13 @@
             xmldocpath = xmldocpath.replace(/#.*$/, '');
         }
 
-        if (_isCrossdomain(xmldocpath) && utils.exists(window.XDomainRequest)) {
+        if (_isCrossdomain(xmldocpath) && exists(window.XDomainRequest)) {
             // IE8 / 9
             xmlhttp = new window.XDomainRequest();
             xmlhttp.onload = _ajaxComplete(xmlhttp, xmldocpath, completecallback, errorcallback, donotparse);
-            xmlhttp.ontimeout = xmlhttp.onprogress = function() {};
+            xmlhttp.ontimeout = xmlhttp.onprogress = noop;
             xmlhttp.timeout = 5000;
-        } else if (utils.exists(window.XMLHttpRequest)) {
+        } else if (exists(window.XMLHttpRequest)) {
             // Firefox, Chrome, Opera, Safari
             xmlhttp = new window.XMLHttpRequest();
             xmlhttp.onreadystatechange =
@@ -578,9 +579,9 @@
                 if (xml && firstChild) {
                     return completecallback(xmlhttp);
                 }
-                var parsedXML = utils.parseXML(xmlhttp.responseText);
+                var parsedXML = parseXML(xmlhttp.responseText);
                 if (parsedXML && parsedXML.firstChild) {
-                    xmlhttp = utils.extend({}, xmlhttp, {
+                    xmlhttp = extend({}, xmlhttp, {
                         responseXML: parsedXML
                     });
                 } else {
@@ -595,7 +596,7 @@
     }
 
     /** Takes an XML string and returns an XML object **/
-    utils.parseXML = function(input) {
+    var parseXML = function(input) {
         var parsedXML;
         try {
             // Parse XML in FF/Chrome/Safari/Opera
@@ -619,7 +620,7 @@
 
 
     /**
-     * Ensure a number is between two bounds
+     * Ensure a number is between two bounds (clamp)
      */
     utils.between = function(num, min, max) {
         return Math.max(Math.min(num, max), min);
@@ -701,12 +702,27 @@
         element.className = utils.trim(_.difference(originalClasses, removeClasses).join(' '));
     };
 
-    utils.indexOf = _.indexOf;
-    utils.noop = function() {};
-
     utils.canCast = function() {
         var cast = jwplayer.cast;
         return !!(cast && _.isFunction(cast.available) && cast.available());
     };
+
+    extend(utils, {
+        exists: exists,
+        extend: extend,
+        foreach: foreach,
+        indexOf: _.indexOf,
+        typeOf: typeOf,
+        deepReplaceKeyName: deepReplaceKeyName,
+        parseXML: parseXML,
+        pluginPathType: pluginPathType,
+        isIETrident: isIETrident,
+        isMSIE: isMSIE,
+        isIOS: isIOS,
+        isAndroid: isAndroid,
+        isInt: isInt,
+        isHTTPS: isHTTPS,
+        noop: noop
+    });
 
 })(jwplayer);
