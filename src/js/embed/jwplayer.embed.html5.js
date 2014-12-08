@@ -12,20 +12,21 @@
 
         function _resizePlugin(plugin, div, onready) {
             return function() {
-                try {
-                    var displayarea = document.querySelector('#' + _container.id + ' .jwmain');
-                    if (onready) {
-                        displayarea.appendChild(div);
-                    }
-                    if (typeof plugin.resize === 'function') {
+                var displayarea = document.querySelector('#' + _container.id + ' .jwmain');
+                if (!displayarea) {
+                    return;
+                }
+                if (onready) {
+                    displayarea.appendChild(div);
+                }
+                if (typeof plugin.resize === 'function') {
+                    plugin.resize(displayarea.clientWidth, displayarea.clientHeight);
+                    setTimeout(function() {
                         plugin.resize(displayarea.clientWidth, displayarea.clientHeight);
-                        setTimeout(function() {
-                            plugin.resize(displayarea.clientWidth, displayarea.clientHeight);
-                        }, 400);
-                    }
-                    div.left = displayarea.style.left;
-                    div.top = displayarea.style.top;
-                } catch (e) {}
+                    }, 400);
+                }
+                div.left = displayarea.style.left;
+                div.top = displayarea.style.top;
             };
         }
 
@@ -64,21 +65,19 @@
          */
         _this.supportsConfig = function() {
             if (!!jwplayer.vid.canPlayType) {
-                try {
-                    if (utils.typeOf(_options.playlist) === 'string') {
-                        return true;
-                    } else {
-                        var sources = _options.playlist[0].sources;
-                        for (var i = 0; i < sources.length; i++) {
-                            var file = sources[i].file,
-                                type = sources[i].type;
+                if (utils.typeOf(_options.playlist) === 'string') {
+                    return true;
+                } else {
+                    var sources = _options.playlist[0].sources;
+                    for (var i = 0; i < sources.length; i++) {
+                        var file = sources[i].file,
+                            type = sources[i].type;
 
-                            if (jwplayer.embed.html5CanPlay(file, type, _options.androidhls)) {
-                                return true;
-                            }
+                        if (jwplayer.embed.html5CanPlay(file, type, _options.androidhls)) {
+                            return true;
                         }
                     }
-                } catch (e) {}
+                }
             }
             return false;
         };
@@ -159,10 +158,10 @@
         if (!mimetype) {
             return true;
         }
-        try {
+        if (jwplayer._.isFunction(jwplayer.vid.canPlayType)) {
             var result = jwplayer.vid.canPlayType(mimetype);
             return !!result;
-        } catch (e) {}
+        }
         return false;
     }
 

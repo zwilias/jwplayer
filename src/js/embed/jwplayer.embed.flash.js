@@ -19,17 +19,24 @@
 
         function _resizePlugin(plugin, div, onready) {
             return function() {
-                try {
-                    if (onready) {
-                        document.getElementById(_api.id + '_wrapper').appendChild(div);
+                var element;
+                if (onready) {
+                    element = document.getElementById(_api.id + '_wrapper');
+                    if (element) {
+                        element.appendChild(div);
                     }
-                    var display = document.getElementById(_api.id).getPluginConfig('display');
-                    if (typeof plugin.resize === 'function') {
-                        plugin.resize(display.width, display.height);
+                }
+                element = document.getElementById(_api.id);
+                if (typeof element.getPluginConfig === 'function') {
+                    var display = element.getPluginConfig('display');
+                    if (display) {
+                        if (typeof plugin.resize === 'function') {
+                            plugin.resize(display.width, display.height);
+                        }
+                        div.style.left = display.x;
+                        div.style.top = display.h;
                     }
-                    div.style.left = display.x;
-                    div.style.top = display.h;
-                } catch (e) {}
+                }
             };
         }
 
