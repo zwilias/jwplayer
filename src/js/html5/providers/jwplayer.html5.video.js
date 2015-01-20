@@ -51,7 +51,6 @@
                 loadedmetadata: _canPlayHandler,
                 loadstart: _generalHandler,
                 pause: _playHandler,
-                play: _playHandler,
                 playing: _playHandler,
                 progress: _progressHandler,
                 ratechange: _generalHandler,
@@ -234,20 +233,11 @@
             }
 
             if (_videotag.paused) {
-                if (_videotag.currentTime === _videotag.duration && _videotag.duration > 3) {
-                    // Needed as of Chrome 20
-                    //_complete();
-                } else {
+                if (_videotag.currentTime !== _videotag.duration || _videotag.duration <= 3) {
                     _this.pause();
                 }
             } else {
-                if (utils.isFF() && evt.type === 'play' && _this.state === states.BUFFERING) {
-                    // In FF, we get an extra "play" event on startup - we need to wait for "playing",
-                    // which is also handled by this function
-                    return;
-                } else {
-                    _this.setState(states.PLAYING);
-                }
+                _this.setState(states.PLAYING);
             }
         }
 
