@@ -1,0 +1,22 @@
+{
+  "name": "jwplayer",
+  "version": "6.12",
+  "homepage": "https://github.com/zwilias/jwplayer",
+  "authors": [
+    "Ilias Van Peer <ilias@idlemonkeys.net>"
+  ],
+  "description": "Unofficial build of jwplayer/jwplayer",
+  "main": ["bin-release/jwplayer.js", "bin-release/jwplayer.html5.js", "jwplayer.flash.swf"],
+  "keywords": [
+    "jwplayer",
+    "flash"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
